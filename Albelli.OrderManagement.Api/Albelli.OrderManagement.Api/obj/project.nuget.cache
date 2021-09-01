@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "0NoyI9WFLTfXndfGYxkw5vjlrohrZ+kn/zpLdfFgQP4WixxKySI3+n3Fj2CFs8ZTLQWG9oJVcNney/021uLt1w==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\IVAN\\Documents\\TestTask\\Manufacturing\\src\\OrderManagement.Api\\Albelli.OrderManagement.Api\\Albelli.OrderManagement.Api\\Albelli.OrderManagement.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\IVAN\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\microsoft.openapi\\1.1.4\\microsoft.openapi.1.1.4.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\swashbuckle.aspnetcore\\5.5.0\\swashbuckle.aspnetcore.5.5.0.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\5.5.0\\swashbuckle.aspnetcore.swagger.5.5.0.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\5.5.0\\swashbuckle.aspnetcore.swaggergen.5.5.0.nupkg.sha512",
+    "C:\\Users\\IVAN\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\5.5.0\\swashbuckle.aspnetcore.swaggerui.5.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
