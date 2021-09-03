@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Albelli.OrderManagement.Api.Models
 {
-    public class Order
+    public class OrderVM
     {
         public int OrderId { get; set; }
-        public IEnumerable<OrderLine> Items { get; set; }
+
+        public IEnumerable<OrderLineVM> Items { get; set; }
+
         public double MinPackageWidth { get; set; }
     }
 }

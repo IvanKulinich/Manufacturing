@@ -1,29 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Albelli.OrderManagement.Api.Data;
 using Albelli.OrderManagement.Api.Models;
+using Albelli.OrderManagement.Api.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Albelli.OrderManagement.Api.Repositories
 {
-    public class OrderRepository
+    public class OrderRepository : IOrderRepository
     {
-        private static readonly IList<Order> _orders = new List<Order>
-        {
-            new Order { OrderId = 1, MinPackageWidth = 19, Items = new List<OrderLine>
-            {
-                new OrderLine { ProductType = "PhotoBook", Quantity = 1 }
-            }}
-        };
+        private readonly ManufacturingDbContext _manufacturingDbContext;
 
-        public void Add(Order order)
+        public OrderRepository(ManufacturingDbContext manufacturingDbContext)
         {
-            order.OrderId = _orders.Max(o => o.OrderId) + 1;
-            _orders.Add(order);
+            _manufacturingDbContext = manufacturingDbContext;
         }
 
-        public Order GetOrder(int orderId)
+        public async Task<Entities.Order> AddAsync(List<OrderLinePostModel> orderLines, double totalPackageWidth)
         {
-            return _orders.FirstOrDefault(x => x.OrderId == orderId);
+            Entities.Order order = new Entities.Order
+            {
+                MinPackageWidth = totalPackageWidth,
+                OrderLines = orderLines
+                    .Select(x => new Entities.OrderLine
+                    {
+                        ProductId = x.Id,
+                        Quantity = x.Quantity
+                    })
+                    .ToList()
+            };
+
+            _manufacturingDbContext.Orders.Add(order);
+            await _manufacturingDbContext.SaveChangesAsync();
+
+            return order;
+        }
+
+        public async Task<OrderVM> GetByIdAsync(int orderId)
+        {
+            return await _manufacturingDbContext.Orders
+                .Include(o => o.OrderLines)
+                .ThenInclude(ol => ol.Product)
+                .Where(x => x.Id == orderId)
+                .Select(x => new OrderVM
+                {
+                    OrderId = x.Id,
+                    MinPackageWidth = x.MinPackageWidth,
+                    Items = x.OrderLines
+                        .Select(ol => new OrderLineVM
+                        {
+                            ProductType = ol.Product.Type,
+                            Quantity = ol.Quantity
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }
