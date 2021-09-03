@@ -1,34 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Albelli.OrderManagement.Api.Data;
 using Albelli.OrderManagement.Api.Models;
+using Albelli.OrderManagement.Api.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Albelli.OrderManagement.Api.Repositories
 {
-    public class ProductInfoRepository
+    public class ProductInfoRepository : IProductInfoRepository
     {
-        private static readonly IDictionary<string, ProductInfo> _productInfo = new Dictionary<string, ProductInfo>()
+        private readonly ManufacturingDbContext _manufacturingDbContext;
+
+        public ProductInfoRepository(ManufacturingDbContext manufacturingDbContext)
         {
-            { "PhotoBook", new ProductInfo { WidthMm = 19 } },
-            { "Calendar", new ProductInfo { WidthMm = 10 } },
-            { "Canvas", new ProductInfo { WidthMm = 16 } },
-            { "Cards", new ProductInfo { WidthMm = 4.7 } },
-            { "Mug", new ProductInfo { WidthMm = 94 } }
-        };
+            _manufacturingDbContext = manufacturingDbContext;
+        }
 
-        public ProductInfo Get(string productType)
+        public async Task<List<ProductInfo>> GetItemsByTypes(IEnumerable<string> productTypes)
         {
-            if (!_productInfo.ContainsKey(productType))
-            {
-                throw new Exception($"No information available for product type {productType}.", null);
-            }
-
-            var info = _productInfo[productType];
-
-            return new ProductInfo
-            {
-                ProductType = productType,
-                WidthMm = info.WidthMm
-            };
+            return await _manufacturingDbContext.Products
+                .Where(x => productTypes.Contains(x.Type))
+                .Select(x => new ProductInfo
+                {
+                    Id = x.Id,
+                    ProductType = x.Type,
+                    WidthMm = x.Width
+                })
+                .ToListAsync();
         }
     }
 }

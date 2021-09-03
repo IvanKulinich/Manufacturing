@@ -1,84 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Albelli.OrderManagement.Api.Models;
-using Albelli.OrderManagement.Api.Repositories;
+using Albelli.OrderManagement.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Albelli.OrderManagement.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/orders")]
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private OrderRepository _orderRepository;
-        private ProductInfoRepository _productInfoRepository;
+        private readonly IOrderService _orderService;
 
-        public OrdersController()
+        public OrdersController(IOrderService orderService)
         {
-            _orderRepository = new OrderRepository();
-            _productInfoRepository = new ProductInfoRepository();
+            _orderService = orderService;
         }
 
-        [HttpPost("orders/place")]
-        public ActionResult PlaceOrder([FromBody] IEnumerable<OrderLine> items)
+        [HttpPost("place")]
+        [ProducesResponseType(typeof(Entities.Order), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PlaceOrder([FromBody] IEnumerable<OrderLineVM> items)
         {
             try
             {
-                var orderLines = items.ToList();
-                var order = new Order { Items = orderLines, MinPackageWidth = PackageWidth(orderLines) };
-
-                _orderRepository.Add(order);
+                var order = await _orderService.AddAsync(items);
 
                 return Ok(order);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpGet("order/{orderId}/retrieve")]
-        public async Task<IActionResult> RetrieveOrder(int orderId)
+        [HttpGet("{orderId}")]
+        [ProducesResponseType(typeof(OrderVM), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAsync(int orderId)
         {
             try
             {
-                var order = _orderRepository.GetOrder(orderId);
-
+                var order = await _orderService.GetByIdAsync(orderId);
                 if (order == null)
                 {
-                    throw new ArgumentException(orderId.ToString());
+                    return NotFound($"Order with id {orderId} not found.");
                 }
 
                 return Ok(order);
             }
-            catch (ArgumentException ex)
-            {
-                return StatusCode(400, ex);
-            }
             catch (Exception ex)
             {
-                throw ex;
+                return BadRequest(ex.Message);
             }
-        }
-
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public double PackageWidth(IEnumerable<OrderLine> items)
-        {
-            double pw = 0;
-
-            foreach (var item in items)
-            {
-                var t = item.ProductType;
-                var q = item.Quantity;
-
-                var info = _productInfoRepository.Get(t);
-
-                pw += info.WidthMm * q;
-            }
-
-            return pw;
         }
     }
 }
